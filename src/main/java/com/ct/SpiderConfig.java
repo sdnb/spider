@@ -8,6 +8,7 @@ public class SpiderConfig {
     private String              uri;
     private int                 timeOutMillSec;
     private String              storeFilePath;
+
 //    private Map<String, String> params;
 //
 //    public Map<String, String> getParams() {

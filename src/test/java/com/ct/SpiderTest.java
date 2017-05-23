@@ -15,15 +15,11 @@ public class SpiderTest {
 
     /**
      * 1 通过传入offset参数及persize，一次获取一页数据
-     * 2 得到数据中的每个藏品的链接
-     *
-     * <figure class="card__standard-image">
-     <a href="/art/collection/search/203842"><img src="http://images.metmuseum.org/CRDImages/es/web-thumb/DP105780.jpg" /></a>
-     </figure>
-     3 得到每个藏品的标题
-     <h2 class="card__title">
-     <a href="/art/collection/search/203842">Standing shelf (one of a pair)</a>
-     </h2>
+     * 2 得到数据中的每个藏品的链接以及标题
+     <a href="/art/collection/search/486633">
+     <span ng-bind-html="search.stripBrTags(searchResult.title)" class="ng-binding">China</span>
+     <span class="search-results__result--subtitle ng-binding" ng-bind-html="searchResult.subTitle">Andrew Spence (American, born 1947) </span>
+     </a>
      4 根据藏品的链接，进入藏品的详细页面
      5 找到附加图片的节点，得到图片url链接
      <div class="additional-images">

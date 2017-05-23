@@ -5,6 +5,9 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.*;
 
 /**
  * Created by chentao on 2017/5/23 0023.
@@ -28,7 +31,7 @@ public class ImageDownloader implements Runnable {
         String sufix = downloadUrl.substring(downloadUrl.lastIndexOf(".")+1);
         try {
             File file = new File( Constant.FILE_STORE_PATH + File.separator + storeName + "." + sufix);
-            if (file.exists()) {
+            if (!file.exists()) {
                 file.createNewFile();
             }
             OutputStream os = new FileOutputStream(file);
@@ -56,9 +59,20 @@ public class ImageDownloader implements Runnable {
 
     public static void main(String[] args) {
 
-        ImageDownloader downloader = new ImageDownloader("http://images.metmuseum.org/CRDImages/as/web-large/DT7033.jpg", "测试图1");
-        Thread t = new Thread(downloader);
-        t.start();
+//        ImageDownloader downloader = new ImageDownloader("http://images.metmuseum.org/CRDImages/as/web-large/DT7033.jpg", "测试图1");
+         BlockingQueue<Map<String, Set<String>>> queue = new ArrayBlockingQueue<Map<String, Set<String>>>(20);
+
+        ExecutorService service = Executors.newFixedThreadPool(10);
+        for (int i = 1; i < 10; i++){
+            Spider spider = new Spider(i);
+            Future<Map<String, Set<String>>> f = service.submit(spider);
+        }
+        ExecutorService service1 = Executors.newFixedThreadPool(10);
+        for (int i = 1; i < 10; i++){
+            Spider spider = new Spider(i);
+
+        }
+
     }
 
 }
