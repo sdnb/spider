@@ -6,24 +6,21 @@ import com.alibaba.fastjson.JSONObject;
 import com.util.HttpClientUtil;
 
 import java.util.*;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Callable;
 
 /**
  * Created by chentao on 2017/5/23 0023.
  */
-public class Spider implements Callable<Map<String, Set<String>>>{
+public class Spider implements Runnable{
 
-    private BlockingQueue<Map<String, Set<String>>> queue = new ArrayBlockingQueue<Map<String, Set<String>>>(20);
+    private final BlockingQueue<Map<String, Set<String>>> queue;
+    private final int page;
 
-    private int page;
-    private static final String url = "http://www.metmuseum.org/api/search";
 
-    public Spider(int page) {
+    public Spider(BlockingQueue<Map<String, Set<String>>> queue, int page) {
+        this.queue = queue;
         this.page = page;
     }
-
 
     /**
      * 抓取网页
@@ -31,7 +28,7 @@ public class Spider implements Callable<Map<String, Set<String>>>{
      * @return
      */
     public String renderByPage() {
-        return HttpClientUtil.doGet(url, buildParams());
+        return HttpClientUtil.doGet(Constant.SEED_URL, buildParams());
     }
 
 
@@ -128,30 +125,40 @@ public class Spider implements Callable<Map<String, Set<String>>>{
             param.put("crdId", String.valueOf(id));
             String result = HttpClientUtil.doGet(url, param);
             JSONObject jo = JSON.parseObject(result);
-            JSONArray ja = (JSONArray)jo.get("results");
-            Set<String> imgUrls = new HashSet<>();
-            for (Object o : ja.toArray()) {
-                JSONObject jobj = (JSONObject)o;
-                String imageUrl = (String) jobj.get("webImageUrl");
-                imgUrls.add(imageUrl);
+            if (jo != null) {
+                JSONArray ja = (JSONArray)jo.get("results");
+                Set<String> imgUrls = new HashSet<>();
+                if (ja != null) {
+                    for (Object o : ja.toArray()) {
+                        JSONObject jobj = (JSONObject) o;
+                        String imageUrl = (String) jobj.get("webImageUrl");
+                        imgUrls.add(imageUrl);
+                    }
+                    map.put(title, imgUrls);
+                }
             }
-            map.put(title, imgUrls);
+
         }
         return map;
     }
 
 
-    public static void main(String[] args) {
-        int page = 1;
-        String url = "http://www.metmuseum.org/api/search";
-        Spider s = new Spider(page);
-    }
+//    public static void main(String[] args) {
+//        int page = 1;
+//        String url = "http://www.metmuseum.org/api/search";
+//        Spider s = new Spider(page);
+//    }
 
     @Override
-    public Map<String, Set<String>> call() throws Exception {
+    public void run() {
         String ret = renderByPage();
         Map<String, Integer> viewUrls = getViewUrlsFromPage(ret);
-        System.out.println(viewUrls);
-        return getTitleAndImageUrls(viewUrls);
+        Map<String, Set<String>> imgs = getTitleAndImageUrls(viewUrls);
+        try {
+            queue.put(imgs);
+            System.out.println("查询结果放入队列:[" + imgs.keySet() + "]");
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 }

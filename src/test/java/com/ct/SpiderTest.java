@@ -3,6 +3,7 @@ package com.ct;
 import com.util.HttpClientUtil;
 import org.junit.Test;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -60,11 +61,13 @@ public class SpiderTest {
 //            System.out.println(g1);
 //        }
 //        System.out.println(HttpClientUtil.doGet(url, params));
+
     }
 
 
+    @Test
     public void testGetProductUrl(){
-
+        File file = new File("e:\\spider\\data\\Bottle with Peony Scroll\\DP274691.jpg ");
     }
 
 }
